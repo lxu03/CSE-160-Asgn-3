@@ -131,40 +131,77 @@ let g_globalAngleY = 0;
 let g_globalAngleX = 0;
 let cam;
 
-function addActionsForHtmlUI() {
-  document.getElementById('angleYSlide').addEventListener('input', function() { g_globalAngleY = this.value; renderScene(); })
-  document.getElementById('angleXSlide').addEventListener('input', function() { g_globalAngleX = this.value; renderScene(); })
-}
-
 function main() {
   setupWebGL();
   connectVariablesToGLSL();
-  addActionsForHtmlUI();
   cam = new Camera();
   
   canvas.onmousedown=click;
   canvas.onmousemove = function(ev) { if(ev.buttons == 1) { click(ev) }}
   document.onkeydown = keydown;
-  initTextures();
-  initTextures2();
+  initTextures(0);
+  initTextures(1);
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
   gl.clear(gl.COLOR_BUFFER_BIT);
   requestAnimationFrame(tick);
 }
 
-function click(ev) {
-  if (ev.shiftKey && g_secondaryAnimation==false) {
-    g_swimAnimation = false;
-    g_secondaryAnimation = true;
-  }
-  else if (ev.shiftKey && g_secondaryAnimation==true) {
-    g_secondaryAnimation = false;
-  }
+var mapo = [
+  [[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1]],
+  [[1,1],[1],[0],[1],[1],[1],[1],[0],[1],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[1,1]],
+  [[1,1],[1],[0],[1],[1],[1],[1],[0],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1,1]],
+  [[1,1],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[1,1]],
+  [[1,1],[1],[0],[1],[1],[1],[1],[0],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[0],[1],[0],[1],[0],[1,1]],
+  [[1,1],[1],[0],[1],[0],[0],[1],[0],[1],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[1],[0],[1],[0],[1],[0],[1,1]],
+  [[1,1],[1],[0],[1],[0],[0],[1],[0],[1],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[1],[0],[1],[0],[1],[0],[1,1]],
+  [[1,1],[1],[0],[1],[1],[1],[1],[0],[1],[1],[1],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[1],[0],[0],[0],[0],[0],[1,1]],
+  [[1,1],[0],[0],[0],[0],[0],[0],[0],[0],[0],[1],[0],[0],[0],[0],[0],[1],[1],[1],[1],[1],[1],[1],[0],[0],[1],[0],[1],[0],[1],[0],[1,1]],
+  [[1,1],[1],[1],[1],[0],[1],[1],[1],[1],[0],[1],[0],[0],[0],[0],[0],[1],[0],[0],[0],[0],[0],[1],[0],[0],[1],[0],[1],[0],[1],[0],[1,1]],
+  [[1,1],[0],[0],[1],[0],[1],[0],[0],[1],[0],[1],[1],[1],[1],[1],[1],[1],[0],[1],[1],[1],[0],[1],[0],[0],[1],[0],[1],[0],[1],[0],[1,1]],
+  [[1,1],[0],[0],[1],[0],[1],[0],[0],[1],[0],[0],[0],[0],[0],[0],[0],[0],[0],[1],[0],[1],[0],[1],[1],[1],[1],[0],[1],[0],[1],[0],[1,1]],
+  [[1,1],[0],[0],[1],[0],[1],[0],[0],[1],[1],[1],[1],[1],[0],[1],[1],[1],[1],[1],[0],[1],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[1,1]],
+  [[1,1],[0],[0],[1],[0],[1],[0],[0],[0],[0],[0],[0],[1],[0],[1],[0],[0],[0],[0],[0],[1],[0],[1],[1],[1],[1],[0],[1],[1],[1],[1],[1,1]],
+  [[1,1],[0],[0],[1],[0],[1],[0],[0],[0],[0],[0],[0],[1],[0],[1],[1],[1],[1],[1],[1],[1],[0],[1],[0],[0],[1],[0],[1],[0],[0],[0],[1,1]],
+  [[1,1],[0],[0],[1],[0],[1],[1],[1],[1],[1],[1],[1],[1],[0],[0],[0],[0],[0],[0],[0],[0],[0],[1],[0],[0],[1],[0],[1],[0],[0],[0],[1,1]],
+  [[1,1],[0],[0],[1],[0],[0],[0],[0],[0],[0],[0],[0],[1],[1],[1],[1],[1],[0],[1],[1],[1],[1],[1],[0],[0],[1],[0],[1],[0],[0],[0],[1,1]],
+  [[1,1],[0],[0],[1],[0],[1],[1],[1],[1],[1],[1],[0],[0],[0],[0],[0],[1],[0],[1],[0],[0],[0],[0],[0],[0],[1],[0],[1],[0],[0],[0],[1,1]],
+  [[1,1],[0],[0],[1],[0],[0],[0],[0],[0],[0],[0],[0],[1],[0],[0],[0],[0],[0],[1],[0],[0],[0],[0],[0],[0],[1],[0],[1],[0],[0],[0],[1,1]],
+  [[1,1],[0],[0],[1],[0],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[0],[1],[0],[0],[0],[0],[0],[0],[1],[0],[1],[0],[0],[0],[1,1]],
+  [[1,1],[0],[0],[1],[0],[1],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[1],[0],[1],[0],[0],[0],[0],[0],[0],[1],[0],[1],[0],[0],[0],[1,1]],
+  [[1,1],[1],[1],[1],[0],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[0],[1],[1],[1],[1],[1],[1],[1],[1],[0],[1],[1],[1],[1],[1,1]],
+  [[1,1],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[1],[0],[1,1]],
+  [[1,1],[1],[1],[0],[1],[1],[1],[1],[1],[1],[0],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[0],[1],[0],[1],[0],[1,1]],
+  [[1,1],[0],[1],[0],[1],[0],[0],[0],[0],[1],[0],[1],[0],[0],[0],[0],[0],[1],[0],[0],[0],[0],[1],[0],[0],[1],[0],[1],[0],[1],[0],[1,1]],
+  [[1,1],[0],[1],[0],[0],[0],[0],[0],[0],[1],[0],[1],[0],[0],[0],[0],[0],[1],[0],[0],[1],[0],[1],[0],[0],[1],[0],[1],[0],[1],[0],[1,1]],
+  [[1,1],[0],[1],[0],[1],[1],[1],[0],[0],[1],[0],[0],[0],[0],[0],[0],[0],[1],[0],[0],[1],[0],[1],[0],[0],[1],[0],[1],[0],[1],[0],[1,1]],
+  [[1,1],[1],[1],[1],[1],[0],[1],[0],[1],[1],[1],[1],[1],[1],[1],[1],[1],[1],[0],[0],[1],[0],[0],[0],[0],[0],[0],[0],[0],[1],[0],[1,1]],
+  [[1,1],[0],[0],[0],[1],[0],[1],[0],[1],[0],[0],[0],[0],[0],[0],[0],[0],[1],[0],[1],[1],[1],[1],[1],[1],[1],[0],[1],[1],[1],[1],[1,1]],
+  [[1,1],[0],[2],[0],[0],[0],[1],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[0],[1],[0],[0],[0],[0],[1],[0],[0],[0],[0],[0],[0],[1,1]],
+  [[1,1],[0],[0],[0],[1],[0],[0],[0],[1],[0],[0],[0],[0],[0],[0],[0],[0],[1],[0],[1],[0],[0],[0],[0],[1],[0],[0],[0],[0],[0],[0],[1,1]],
+  [[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1],[1,1]]
+]
 
+let prev_x = 0;
+let prev_y = 0;
+function click(ev) {
   let [x, y] = convertCoordinatesEventToGL(ev);
-  g_globalAngleX += x;
-  g_globalAngleY += y;
+  change_x = x - prev_x;
+  if(change_x < 0) {
+    cam.panRight(1)
+  }
+  else if (change_x > 0) {
+    cam.panLeft(1)
+  }
+  change_y = y - prev_y;
+  if(change_y < 0) {
+    cam.panUp()
+  }
+  else if(change_y > 0) {
+    cam.panDown()
+  }
+  prev_x = x;
+  prev_y = y;
 }
 
 function keydown(ev) {
@@ -180,15 +217,27 @@ function keydown(ev) {
   else if (ev.keyCode==83) {
     cam.moveBackward()
   }
+  else if (ev.keyCode==32) {
+    cam.moveUp()
+  }
+  else if (ev.keyCode==16) {
+    cam.moveDown()
+  }
   else if (ev.keyCode==81) {
-    cam.panLeft()
+    cam.panLeft(5)
   }
   else if (ev.keyCode==69) {
-    cam.panRight()
+    cam.panRight(5)
+  }
+  else if (ev.keyCode==71) {
+    deleteBlock()
+  }
+  else if (ev.keyCode==70) {
+    placeBlock()
   }
   renderScene();
-  //console.log(ev.keyCode);
 }
+
 function convertCoordinatesEventToGL(ev) {
   var x = ev.clientX; 
   var y = ev.clientY; 
@@ -199,41 +248,42 @@ function convertCoordinatesEventToGL(ev) {
   return ([x, y]);
 }
 
-function initTextures() {
-  var image = new Image();
-  if(!image) {
-    console.log('Failed to create the image object');
-    return false;
+function initTextures(index) {
+  if(index == 0) {
+    var image = new Image();
+    if(!image) {
+      console.log('Failed to create the image object');
+      return false;
+    }
+    image.onload = function() {sendTextureToGLSL(image);}
+    image.src = 'brick.png';
+    return true;
   }
-  image.onload = function() {sendTextureToGLSL(image);}
-  image.src = 'shu.png';
-  return true;
+  else if(index == 1) {
+    var image = new Image();
+    if(!image) {
+      console.log('Failed to create the image object');
+      return false;
+    }
+    image.onload = function() {sendTextureToGLSL2(image);}
+    image.src = 'sky.jpg';
+    return true;
+  }
 }
 
-function initTextures2() {
-  var image = new Image();
-  if(!image) {
-    console.log('Failed to create the image object');
-    return false;
-  }
-  image.onload = function() {sendTextureToGLSL2(image);}
-  image.src = 'sky.jpg'
-  return true;
-}
-
-function sendTextureToGLSL(image) {
-  var texture = gl.createTexture();
-  if(!texture) {
-    console.log('Failed to create the texture object');
-    return false;
-  }
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-  gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB,gl.RGB, gl.UNSIGNED_BYTE, image);
-  gl.uniform1i(u_Sampler0, 0);
-  console.log('finished loadTexture');
+function sendTextureToGLSL(img) {
+    var texture = gl.createTexture();
+    if(!texture) {
+      console.log('Failed to create the texture object');
+      return false;
+    }
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB,gl.RGB, gl.UNSIGNED_BYTE, img);
+    gl.uniform1i(u_Sampler0, 0);
+    console.log('finished loadTexture');
 }
 
 function sendTextureToGLSL2(image) {
@@ -260,31 +310,66 @@ function tick() {
   requestAnimationFrame(tick);
 }
 
-var g_map = [
-  [1,1,1,1,1,1,1,1],
-  [1,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,1],
-  [1,0,0,1,1,0,0,1],
-  [1,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,1],
-  [1,0,0,0,1,0,0,1],
-  [1,1,1,1,1,1,1,1]
-];
-
 function drawMap() {
-  for(x=0; x<8; x++) {
-    for (y=0; y<8; y++){
-      if(g_map[x][y] == 1) {
-        var body = new Cube();
-        if(y%2 == 0) {
+  for(x=0; x<32; x++) {
+    for (z=0; z<32; z++){
+      for (y=0; y<mapo[x][z].length; y++) {
+        if(mapo[x][z][y] == 1) {
+          var body = new Cube();
           body.textureNum = 0
+          body.color = [0, 1.0, 1.0, 1.0];
+          body.matrix.translate(x-16, -0.75, z-16);
+          body.matrix.translate(0, y, 0)
+          body.renderFast();
         }
-        else if (y%3==0) {
+        if(mapo[x][z][y] == 2) {
+          var body = new Cube();
           body.textureNum = -2
+          body.color = [1.0, 0.84, 0, 1.0];
+          body.matrix.translate(x-16, -0.75, z-16);
+          body.matrix.translate(0, y, 0)
+          body.renderFast();
         }
-        body.color = [0, 1.0, 1.0, 1.0];
-        body.matrix.translate(x-4, -0.75, y-4);
-        body.render();
+      }
+    }
+  }
+}
+
+function deleteBlock() {
+  for(x=0; x<32; x++) {
+    for (z=0; z<32; z++){
+      for (y=0; y<mapo[x][z].length; y++) {
+        if(mapo[x][z][y] == 1) {
+          var body = new Cube();
+          body.textureNum = 0
+          body.color = [0, 1.0, 1.0, 1.0];
+          body.matrix.translate(x-16, -0.75, z-16);
+          body.matrix.translate(0, y, 0)
+          if((cam.at.elements[0]+1 >= (x-16) && cam.at.elements[0]-1 <= (x-16)) && (cam.at.elements[2]<=(z-16) && cam.at.elements[2]+5 >= (z-16))) {
+            mapo[x][z][y] = 0
+          }
+          body.renderFast();
+        }
+      }
+    }
+  }
+}
+
+function placeBlock() {
+  for(x=0; x<32; x++) {
+    for (z=0; z<32; z++){
+      for (y=0; y<mapo[x][z].length; y++) {
+        if(mapo[x][z][y] == 0) {
+          var body = new Cube();
+          body.textureNum = 0
+          body.color = [0, 1.0, 1.0, 1.0];
+          body.matrix.translate(x-16, -0.75, z-16);
+          body.matrix.translate(0, y, 0)
+          if((cam.at.elements[0]+1 >= (x-16) && cam.at.elements[0]-1 <= (x-16)) && (cam.at.elements[2]<=(z-16) && cam.at.elements[2]+5 >= (z-16))) {
+            mapo[x][z][y] = 1
+          }
+          body.renderFast();
+        }
       }
     }
   }
@@ -307,17 +392,22 @@ function renderScene() {
   floor.textureNum = -2;
   floor.color = [0.5, 0.5, 0.5, 1.0]
   floor.matrix.translate(0, -0.75, 0);
-  floor.matrix.scale(10,0,10);
+  floor.matrix.scale(32,0,32);
   floor.matrix.translate(-0.5, 0, -0.5);
-  floor.render();
+  floor.renderFast();
 
   var sky = new Cube();
   sky.color = [1, 0, 0, 1];
   sky.textureNum = 1;
   sky.matrix.scale(50, 50, 50);
   sky.matrix.translate(-0.5, -0.5, -0.5);
-  sky.render();
+  sky.renderFast();
 
+  var test = new Cube();
+  test.color = [1,0,0,1];
+  test.textureNum = 0;
+  test.matrix.translate(-1, -0.75, -1)
+  //test.renderFast();
   drawMap();
   
   var duration = performance.now() - startTime;
